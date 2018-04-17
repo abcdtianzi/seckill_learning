@@ -1,0 +1,65 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.seckill.dao.SeckillDao">
+    <resultMap type="org.seckill.entity.Seckill" id="sekillResult">
+        <result column="id" property="id"/>
+        <result column="name" property="name" javaType="java.lang.String" jdbcType="LONGVARCHAR"/>
+        <result column="number" property="number" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+
+    <update id="reduceNumber">
+        UPDATE
+          seckill
+        SET
+          number = number-1
+        WHERE  id = #{id}
+        AND start_time <![CDATA[ <= ]]> #{killTime}
+        AND  end_time >= #{killTime}
+        AND number > 0;
+    </update>
+
+    <select id="queryById" resultMap="sekillResult">
+        SELECT
+        id,
+          `name`,
+          number,
+          start_time,
+          end_time,
+          create_time
+        FROM  seckill
+        WHERE  id = #{id}
+    </select>
+
+    <select id="queryAll" resultType="Seckill">
+        SELECT
+          id,
+          `name`,
+          number,
+          start_time,
+          end_time,
+          create_time
+        FROM  seckill
+        ORDER BY create_time DESC
+        limit #{offset},#{limit}
+    </select>
+
+
+   <!--mybatis调用存储过程-->
+    <select id="killByProcedure" statementType="CALLABLE">
+        call execute_seckill(
+        #{id, jdbcType=BIGINT,mode=IN},
+        #{phone, jdbcType=BIGINT,mode=IN},
+        #{killTime, jdbcType=TIMESTAMP,mode=IN},
+        #{result, jdbcType=INTEGER,mode=OUT}
+        )
+    </select>
+
+
+
+</mapper>
